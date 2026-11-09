@@ -1,6 +1,9 @@
 <?php
-
-class database {
+/**
+ * Andmebaasiühendus (PDO). Kõik päringud käivad läbi ettevalmistatud
+ * lausete (prepared statements), et vältida SQL-süstimist.
+ */
+class Database {
     private $conn;
     private $host;
     private $user;
@@ -8,10 +11,10 @@ class database {
     private $baseName;
 
     function __construct() {
-        $this->host = 'db';
-        $this->user = 'root';
-        $this->password = 'root';
-        $this->baseName = 'newsportal';
+        $this->host     = getenv('DB_HOST') ?: 'db';
+        $this->user     = getenv('DB_USER') ?: 'root';
+        $this->password = getenv('DB_PASSWORD') !== false ? getenv('DB_PASSWORD') : 'root';
+        $this->baseName = getenv('DB_NAME') ?: 'ilusalong';
         $this->connect();
     }
 
@@ -22,11 +25,13 @@ class database {
     function connect() {
         if (!$this->conn) {
             try {
-                $this->conn = new PDO('mysql:host='.$this->host.';dbname='.$this->
-                baseName.'', $this->user, $this->password, array(PDO::
-                MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
-            }
-            catch (Exception $e) {
+                $this->conn = new PDO(
+                    'mysql:host=' . $this->host . ';dbname=' . $this->baseName . ';charset=utf8mb4',
+                    $this->user,
+                    $this->password,
+                    array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION)
+                );
+            } catch (Exception $e) {
                 die('Connection failed : ' . $e->getMessage());
             }
         }
@@ -34,30 +39,31 @@ class database {
     }
 
     function disconnect() {
-        if ($this->conn) {
-            $this->conn = null;
-        }
+        $this->conn = null;
     }
 
-    function getOne($query) {
+    // Üks rida
+    function getOne($query, $params = array()) {
         $stmt = $this->conn->prepare($query);
-        $stmt->execute();
-        $stmt->setFetchMode(PDO::FETCH_ASSOC);
-        $response = $stmt->fetch();
-        return $response;
+        $stmt->execute($params);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    function getAll($query) {
+    // Kõik read
+    function getAll($query, $params = array()) {
         $stmt = $this->conn->prepare($query);
-        $stmt->execute();
-        $stmt->setFetchMode(PDO::FETCH_ASSOC);
-        $response = $stmt->fetchAll();
-        return $response;
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    function executeRun($query) {
-        $response = $this->conn->exec($query);
-        return $response;
+    // INSERT / UPDATE / DELETE — tagastab muudetud ridade arvu
+    function executeRun($query, $params = array()) {
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute($params);
+        return $stmt->rowCount();
+    }
+
+    function lastInsertId() {
+        return $this->conn->lastInsertId();
     }
 }
-?>
