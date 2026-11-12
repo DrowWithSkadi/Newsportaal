@@ -1,51 +1,94 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>NEWSPORTAL</title>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-              integrity=
-              "sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fq784/j6cY/iJTUQOhoCwR7x9JvORxT2MZw1"
-              crossorigin="anonymous">
-              <link rel="stylesheet" type="text/css" href="style.css">
-        <link href="https://fonts.googleapis.com/css?family=Noto+Serif" rel="stylesheet">
-        <meta charset="utf-8">
-    </head>
-    <body>
-        <nav class="one">
-            <ul class="topmenu">
-                <li><a href="#">Kategooriad <i class="fa fa-angle-down"></i></a>
-                    <ul class="submenu">
-                        <?php
-                            Controller::AllCategory();
-                        ?>
-                    </ul>
-                </li>
-                <li><a href="info">Info</a></li>
-                <li><a href="./">Stardileht</a></li>
-                <li><a href="registerForm">Register</a></li>
-                <li class="pull-right">
-                    <form action="search" method="GET">
-                        <input type="text" name="otsi">
-                        <input type="submit" value="Otsi">
-                    </form>
-                </li>
-            </ul>
-        </nav>
+<html lang="<?php echo Lang::current(); ?>">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><?php echo isset($pageTitle) ? e($pageTitle) . ' — ' : ''; ?><?php echo e(t('site_name')); ?></title>
+    <meta name="description" content="<?php echo e(t('hero_text')); ?>">
+    <link rel="icon" href="public/img/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Manrope:wght@400;500;600;700&display=swap&subset=cyrillic,latin-ext" rel="stylesheet">
+    <link rel="stylesheet" href="public/css/style.css">
+</head>
+<body>
+    <header class="site-header" id="top">
+        <div class="container header-inner">
+            <a class="logo" href="./">
+                <?php echo Icon::svg('lotus', 'logo-icon'); ?>
+                <span>Lilia<small><?php echo Lang::current() == 'et' ? 'ilusalong' : 'салон красоты'; ?></small></span>
+            </a>
 
-        <section>
-            <div class = 'divBox'>
-                <?php
-                if(isset($content)){
-                    echo $content;
-                }
-                else {
-                    echo '<h1>Content is gone!</h1>';
-                }
-                ?>
+            <button class="burger" type="button" aria-label="<?php echo e(t('menu')); ?>" aria-expanded="false" aria-controls="main-nav">
+                <?php echo Icon::svg('menu', 'icon icon-open') . Icon::svg('close', 'icon icon-close'); ?>
+            </button>
+
+            <nav class="main-nav" id="main-nav">
+                <ul class="topmenu">
+                    <li><a href="./"><?php echo e(t('nav_home')); ?></a></li>
+                    <li class="has-sub">
+                        <a href="services"><?php echo e(t('nav_services')); ?> <?php echo Icon::svg('chevron', 'icon chev'); ?></a>
+                        <ul class="submenu">
+                            <li><a href="services"><?php echo e(t('nav_all_services')); ?></a></li>
+                            <?php foreach (Controller::AllCategory() as $cat): ?>
+                                <li><a href="category?id=<?php echo (int)$cat['id']; ?>"><?php echo e(Lang::field($cat, 'name')); ?></a></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </li>
+                    <li><a href="masters"><?php echo e(t('nav_masters')); ?></a></li>
+                    <li><a href="contact"><?php echo e(t('nav_contact')); ?></a></li>
+                    <li><a href="registerForm"><?php echo e(t('nav_register')); ?></a></li>
+                </ul>
+
+                <form class="search-form" action="search" method="GET" role="search">
+                    <input type="search" name="q" placeholder="<?php echo e(t('search_placeholder')); ?>"
+                           value="<?php echo isset($_GET['q']) ? e($_GET['q']) : ''; ?>" aria-label="<?php echo e(t('search_btn')); ?>">
+                    <button type="submit" aria-label="<?php echo e(t('search_btn')); ?>"><?php echo Icon::svg('search'); ?></button>
+                </form>
+
+                <div class="lang-switch" aria-label="Language">
+                    <?php foreach (Lang::SUPPORTED as $l): ?>
+                        <a href="<?php echo Lang::switchUrl($l); ?>" class="<?php echo $l == Lang::current() ? 'active' : ''; ?>" hreflang="<?php echo $l; ?>"><?php echo strtoupper($l); ?></a>
+                    <?php endforeach; ?>
+                </div>
+
+                <a class="btn btn-nav" href="booking"><?php echo e(t('nav_book')); ?></a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <?php
+        if (isset($content)) {
+            echo $content;
+        }
+        ?>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-grid">
+            <div>
+                <a class="logo logo-light" href="./"><?php echo Icon::svg('lotus', 'logo-icon'); ?><span>Lilia</span></a>
+                <p><?php echo e(t('footer_text')); ?></p>
             </div>
-        </section>
-    
-        <hr>
-        <p style="display:block; text-align:center;">JPTV24 2026 a. &copy</p>
-    </body>
+            <div>
+                <h4><?php echo e(t('nav_contact')); ?></h4>
+                <p><?php echo Icon::svg('pin'); ?> <?php echo e(t('address_value')); ?></p>
+                <p><?php echo Icon::svg('phone'); ?> <a href="tel:+37255501234">+372 5550 1234</a></p>
+                <p><?php echo Icon::svg('mail'); ?> <a href="mailto:info@lilia.ee">info@lilia.ee</a></p>
+            </div>
+            <div>
+                <h4><?php echo e(t('hours')); ?></h4>
+                <p><?php echo e(t('hours_weekdays')); ?></p>
+                <p><?php echo e(t('hours_saturday')); ?></p>
+                <p><?php echo e(t('hours_sunday')); ?></p>
+            </div>
+        </div>
+        <p class="copyright">&copy; <?php echo date('Y'); ?> Lilia · JPTV24 · <?php echo e(t('rights')); ?></p>
+    </footer>
+
+    <button class="to-top" type="button" aria-label="<?php echo e(t('to_top')); ?>"><?php echo Icon::svg('arrow-up'); ?></button>
+
+    <script src="public/js/main.js"></script>
+</body>
 </html>
