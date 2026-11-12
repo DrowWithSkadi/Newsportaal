@@ -1,29 +1,19 @@
 <?php
+$pageTitle = t('register_title');
 ob_start();
-
-if(isset($result)){
-    if($result[0]==true)
-    {
-        ?>
-        <div class="container">
-            <div class="alert alert-info">
-                <strong>Пользователь добавлен. </strong><a href="admin/"> Dashboard</a>
-            </div>
-        </div>
-        <?php
-    }
-    else if($result[0]==false)
-    {
-        ?>
-        <div class="container">
-            <div class="alert alert-warning">
-                <strong>Ошибка!</strong> <?php echo $result[1];?><a href="registerForm"> Форма регистрации</a>
-            </div>
-        </div>
-        <?php
-    }
-}
 ?>
-<?php $content = ob_get_clean(); ?>
-
-<?php include "view/layout.php";
+<section class="section">
+    <div class="container narrow-sm">
+        <?php if ($result[0] == true): ?>
+            <div class="alert alert-ok"><strong><?php echo e(t('reg_ok')); ?></strong> <a href="./"><?php echo e(t('back_home')); ?></a></div>
+        <?php else: ?>
+            <div class="alert alert-error">
+                <strong><?php echo e(t('reg_err')); ?></strong><br><?php echo $result[1]; ?><br>
+                <a href="registerForm"><?php echo e(t('reg_back')); ?></a>
+            </div>
+        <?php endif; ?>
+    </div>
+</section>
+<?php
+$content = ob_get_clean();
+include_once 'view/layout.php';
