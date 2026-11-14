@@ -1,0 +1,53 @@
+/* Lilia halduspaneel — Bootstrap 3 kohandused */
+body { background: #f7f2ef; color: #2f2430; font-family: 'Segoe UI', system-ui, sans-serif; }
+a { color: #9c5b74; }
+a:hover, a:focus { color: #7a4159; }
+h2 { margin-top: 10px; }
+
+.btn-primary { background: #9c5b74; border-color: #8a4d65; }
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active { background: #7a4159 !important; border-color: #6c3850 !important; }
+.nav-pills > li.active > a, .nav-pills > li.active > a:hover, .nav-pills > li.active > a:focus { background: #9c5b74; }
+.label-pink { background: #e8bfcd; color: #7a4159; margin-left: 4px; }
+
+.admin-nav { background: #2f2430; border: 0; margin-bottom: 0; }
+.admin-nav .navbar-brand, .admin-nav .nav > li > a { color: #e9dde2 !important; }
+.admin-nav .navbar-brand small { color: #b9a3ad; font-size: 12px; }
+.admin-nav .navbar-brand .fa { color: #f1b9cb; }
+.admin-nav .nav > li > a:hover, .admin-nav .nav > .active > a, .admin-nav .nav > .active > a:hover { background: #47364a !important; color: #fff !important; }
+.admin-nav .navbar-toggle .icon-bar { background: #fff; }
+.admin-nav .navbar-collapse { border-color: #47364a; }
+
+.admin-content { padding-top: 25px; min-height: 70vh; }
+.admin-footer { color: #9c8f95; font-size: 12px; padding: 30px 15px; text-align: center; }
+
+.panel { border: 0; border-radius: 10px; box-shadow: 0 4px 16px rgba(80, 45, 60, .07); }
+.panel-heading { border-radius: 10px 10px 0 0; }
+.table > tbody > tr > th { border-top: 0; color: #7c6f76; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+.table > tbody > tr > td { vertical-align: middle; }
+
+.page-header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
+.page-header-row h2 { margin: 0; }
+.actions { white-space: nowrap; }
+form.inline { display: inline-block; }
+
+.thumb { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; display: inline-block; }
+.thumb-lg { width: 120px; height: 90px; margin-right: 15px; margin-bottom: 8px; }
+.thumb-empty { background: #f1e6ea; color: #c09aaa; text-align: center; line-height: 56px; font-size: 20px; }
+.current-pic { margin-bottom: 8px; }
+
+.stats-row { margin-bottom: 10px; }
+.stat-box { display: block; background: #fff; border-radius: 10px; padding: 18px; margin-bottom: 20px; color: #7c6f76; box-shadow: 0 4px 16px rgba(80, 45, 60, .07); transition: transform .2s; }
+.stat-box:hover { text-decoration: none; transform: translateY(-3px); color: #7c6f76; }
+.stat-box strong { display: block; font-size: 32px; color: #9c5b74; line-height: 1.1; }
+
+.status { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.status-new { background: #fff1d6; color: #8a6114; }
+.status-confirmed { background: #e3f1e5; color: #2f6b3c; }
+.status-cancelled { background: #f6e1df; color: #8a2f29; }
+.status-select { width: auto; display: inline-block; font-weight: 600; }
+.filter-pills { margin-bottom: 15px; }
+
+.login-page { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #f6dce4, #f7f2ef 60%, #e5eedf); }
+.login-card { background: #fff; width: 100%; max-width: 380px; padding: 35px 30px; border-radius: 16px; box-shadow: 0 18px 40px rgba(80, 45, 60, .15); text-align: center; margin: 15px; }
+.login-logo { width: 64px; height: 64px; border-radius: 50%; background: #f3e3e8; color: #9c5b74; font-size: 30px; line-height: 64px; margin: 0 auto 10px; }
+.login-back { margin: 15px 0 0; }
