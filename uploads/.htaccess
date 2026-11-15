@@ -1,0 +1,4 @@
+# Üleslaetud pildid: PHP-failide käivitamine keelatud
+<FilesMatch "\.(php|phtml|phar)$">
+    Require all denied
+</FilesMatch>
