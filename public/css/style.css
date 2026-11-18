@@ -133,6 +133,21 @@ p { margin: 0 0 1em; }
 .lang-switch a.active { background: var(--card); color: var(--accent-dark); box-shadow: 0 2px 6px rgba(0, 0, 0, .06); }
 .btn-nav { padding: .6em 1.2em; }
 
+/* Konto: sisse- ja väljalogimine paremas ülanurgas */
+.main-nav { margin-left: auto; }
+.account { display: flex; align-items: center; gap: .25rem; padding-left: 1rem; border-left: 1px solid var(--line); }
+.account-link { display: flex; align-items: center; gap: .4rem; padding: .45rem .7rem; border-radius: 999px; color: var(--ink); font-weight: 600; font-size: .9rem; white-space: nowrap; transition: background var(--t), color var(--t); }
+.account-link .icon { width: 20px; height: 20px; color: var(--accent); }
+.account-link:hover { background: var(--accent-soft); color: var(--accent-dark); }
+.account-link span { max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
+.logout-form { margin: 0; }
+.icon-btn { display: flex; border: 0; background: none; color: var(--muted); padding: .45rem; border-radius: 50%; cursor: pointer; transition: background var(--t), color var(--t); }
+.icon-btn .icon { width: 20px; height: 20px; }
+.icon-btn:hover { background: var(--accent-soft); color: var(--accent-dark); }
+.auth-switch { text-align: center; color: var(--muted); font-size: .9rem; margin: 0; }
+.flash { padding-top: 1.2rem; }
+.flash .alert { margin-bottom: 0; }
+
 /* ----------------------------- Hero ------------------------------- */
 .hero { position: relative; overflow: hidden; padding: clamp(3rem, 8vw, 6rem) 0 3rem; }
 .hero-inner { display: grid; grid-template-columns: 1.2fr 1fr; gap: 2rem; align-items: center; position: relative; z-index: 1; }
@@ -359,6 +374,7 @@ p { margin: 0 0 1em; }
     .search-form input, .search-form input:focus { width: 100%; }
     .lang-switch { align-self: flex-start; }
     body.nav-open { overflow: hidden; }
+    .account { margin-left: auto; padding-left: 0; border-left: 0; }
 
     .hero-inner, .service-detail, .reviews-layout { grid-template-columns: 1fr; }
     .hero-art { max-width: 280px; order: -1; }
@@ -368,6 +384,8 @@ p { margin: 0 0 1em; }
 
 @media (max-width: 640px) {
     body { font-size: 15px; }
+    .account-link span { display: none; }
+    .account-link { padding: .45rem; }
     .stats { grid-template-columns: 1fr; gap: .7rem; }
     .stat { display: flex; align-items: center; gap: 1rem; text-align: left; padding: 1rem 1.2rem; }
     .stat strong { font-size: 2rem; min-width: 80px; }

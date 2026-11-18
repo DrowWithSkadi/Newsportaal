@@ -6,6 +6,8 @@ ob_start();
     <div class="container narrow-sm">
         <form class="form auth-form reveal" method="POST" action="registerAnswer">
             <h1><?php echo e(t('register_title')); ?></h1>
+            <?php echo Auth::csrfField(); ?>
+            <input type="hidden" name="return" value="<?php echo e($return); ?>">
             <label><?php echo e(t('reg_name')); ?>
                 <input type="text" name="name" maxlength="100" required autofocus>
             </label>
@@ -19,6 +21,8 @@ ob_start();
                 <input type="password" name="confirm" minlength="6" required>
             </label>
             <button type="submit" class="btn btn-block" name="save"><?php echo e(t('reg_btn')); ?></button>
+            <p class="auth-switch"><?php echo e(t('login_have_account')); ?>
+                <a href="login?return=<?php echo urlencode($return); ?>"><?php echo e(t('login')); ?></a></p>
         </form>
     </div>
 </section>

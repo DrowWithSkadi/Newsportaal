@@ -7,6 +7,9 @@ class Register {
         if (!isset($_POST['save'])) {
             return $result;
         }
+        if (!Auth::csrfValid()) {
+            return array(0 => false, 1 => e(t('csrf_err')));
+        }
 
         $errors   = array();
         $name     = trim(isset($_POST['name']) ? $_POST['name'] : '');
@@ -40,6 +43,11 @@ class Register {
             "INSERT INTO users (username, email, password, status, registration_date) VALUES (?, ?, ?, 'user', CURDATE())",
             array(mb_substr($name, 0, 100), strtolower($email), password_hash($password, PASSWORD_DEFAULT))
         );
-        return $ok ? array(0 => true) : $result;
+        if (!$ok) {
+            return $result;
+        }
+        // uus kasutaja logitakse kohe sisse
+        Auth::login($db->getOne("SELECT * FROM users WHERE id = ?", array((int)$db->lastInsertId())));
+        return array(0 => true);
     }
 }

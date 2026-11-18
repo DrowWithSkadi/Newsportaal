@@ -37,7 +37,6 @@
                     </li>
                     <li><a href="masters"><?php echo e(t('nav_masters')); ?></a></li>
                     <li><a href="contact"><?php echo e(t('nav_contact')); ?></a></li>
-                    <li><a href="registerForm"><?php echo e(t('nav_register')); ?></a></li>
                 </ul>
 
                 <form class="search-form" action="search" method="GET" role="search">
@@ -54,10 +53,30 @@
 
                 <a class="btn btn-nav" href="booking"><?php echo e(t('nav_book')); ?></a>
             </nav>
+
+            <?php $authUser = Auth::user(); ?>
+            <div class="account">
+                <?php if ($authUser): ?>
+                    <a class="account-link" href="myBookings" title="<?php echo e(t('account_menu')); ?>">
+                        <?php echo Icon::svg('user'); ?><span><?php echo e($authUser['name']); ?></span>
+                    </a>
+                    <form method="POST" action="logout" class="logout-form">
+                        <?php echo Auth::csrfField(); ?>
+                        <button type="submit" class="icon-btn" title="<?php echo e(t('logout')); ?>" aria-label="<?php echo e(t('logout')); ?>"><?php echo Icon::svg('logout'); ?></button>
+                    </form>
+                <?php else: ?>
+                    <a class="account-link" href="login?return=<?php echo urlencode(Controller::currentPath()); ?>">
+                        <?php echo Icon::svg('user'); ?><span><?php echo e(t('login')); ?></span>
+                    </a>
+                <?php endif; ?>
+            </div>
         </div>
     </header>
 
     <main>
+        <?php if ($flash = Controller::takeFlash()): ?>
+            <div class="container flash"><div class="alert alert-<?php echo $flash['type']; ?>"><?php echo e($flash['text']); ?></div></div>
+        <?php endif; ?>
         <?php
         if (isset($content)) {
             echo $content;

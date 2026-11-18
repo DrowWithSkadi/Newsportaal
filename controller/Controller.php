@@ -115,13 +115,94 @@ class Controller {
         include_once 'view/error404.php';
     }
 
+    //------------------------- ABIFUNKTSIOONID
+    // Praegune leht koos parameetritega (tagasisuunamiseks pärast sisselogimist)
+    public static function currentPath() {
+        $uri = $_SERVER['REQUEST_URI'];
+        $last = substr($uri, strrpos(explode('?', $uri)[0], '/') + 1);
+        $last = preg_replace('/([?&])lang=[a-z]+&?/', '$1', $last);
+        return Auth::safeReturn(rtrim($last, '?&'), '');
+    }
+
+    public static function redirect($url) {
+        header('Location: ' . $url);
+        exit;
+    }
+
+    // Ühekordne teade järgmisel lehel
+    public static function flash($type, $text) {
+        $_SESSION['flash'] = array('type' => $type, 'text' => $text);
+    }
+
+    public static function takeFlash() {
+        if (!isset($_SESSION['flash'])) {
+            return null;
+        }
+        $f = $_SESSION['flash'];
+        unset($_SESSION['flash']);
+        return $f;
+    }
+
+    // Kui kasutaja pole sisse logitud, suunatakse sisselogimisele ja pärast tagasi
+    public static function requireLogin($return) {
+        if (!Auth::check()) {
+            self::flash('error', t('login_required'));
+            self::redirect('login?return=' . urlencode($return));
+        }
+    }
+
+    //------------------------- SISSELOGIMINE
+    public static function loginForm($error = '', $email = '') {
+        if (Auth::check()) {
+            self::redirect('./');
+        }
+        $return = Auth::safeReturn(isset($_REQUEST['return']) ? $_REQUEST['return'] : '', '');
+        include_once 'view/formLogin.php';
+    }
+
+    public static function loginAction() {
+        $email = isset($_POST['email']) ? trim($_POST['email']) : '';
+        if (!Auth::csrfValid()) {
+            return self::loginForm(t('csrf_err'), $email);
+        }
+        $result = Auth::attempt($email, isset($_POST['password']) ? $_POST['password'] : '');
+        if ($result['ok']) {
+            $user = Auth::user();
+            self::flash('ok', sprintf(t('welcome_back'), $user['name']));
+            self::redirect(Auth::safeReturn(isset($_POST['return']) ? $_POST['return'] : ''));
+        }
+        if ($result['error'] === 'login_locked') {
+            $error = sprintf(t('login_locked'), $result['minutes']);
+        } else {
+            $error = t('login_err') . ($result['left'] !== null ? ' ' . sprintf(t('login_left'), $result['left']) : '');
+        }
+        return self::loginForm($error, $email);
+    }
+
+    public static function logoutAction() {
+        if (Auth::csrfValid()) {
+            Auth::logout();
+            self::flash('ok', t('logged_out'));
+        }
+        self::redirect('./');
+    }
+
     //------------------------- REGISTREERIMINE
     public static function registerForm() {
+        if (Auth::check()) {
+            self::redirect('./');
+        }
+        $return = Auth::safeReturn(isset($_GET['return']) ? $_GET['return'] : '', '');
         include_once 'view/formRegister.php';
     }
 
+    // Pärast edukat registreerimist logitakse kasutaja kohe sisse
     public static function registerUser() {
         $result = Register::registerUser();
+        if ($result[0] == true) {
+            self::flash('ok', t('reg_ok'));
+            self::redirect(Auth::safeReturn(isset($_POST['return']) ? $_POST['return'] : ''));
+        }
         include_once 'view/answerRegister.php';
     }
 }

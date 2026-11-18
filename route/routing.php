@@ -43,6 +43,13 @@ elseif ($path == 'contact') {
 elseif ($path == 'search') {
     $response = Controller::Search(isset($_GET['q']) ? $_GET['q'] : '');
 }
+//----------------- konto: sisse- ja väljalogimine
+elseif ($path == 'login') {
+    $response = $isPost ? Controller::loginAction() : Controller::loginForm();
+}
+elseif ($path == 'logout' and $isPost) {
+    $response = Controller::logoutAction();
+}
 //----------------- kasutaja registreerimine
 elseif ($path == 'registerForm') {
     $response = Controller::registerForm();

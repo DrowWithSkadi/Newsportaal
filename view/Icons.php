@@ -15,6 +15,7 @@ class Icon {
         'star'     => '<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.8l-5.2 2.8 1-5.8-4.3-4.1 5.9-.9Z"/>',
         'calendar' => '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
         'user'     => '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+        'logout'   => '<path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l-5-5 5-5M5 12h11"/>',
         'menu'     => '<path d="M4 7h16M4 12h16M4 17h16"/>',
         'close'    => '<path d="M6 6l12 12M18 6 6 18"/>',
         'arrow-up' => '<path d="M12 19V5M5 12l7-7 7 7"/>',

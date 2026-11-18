@@ -1,4 +1,5 @@
 <?php
+session_set_cookie_params(array('path' => '/', 'httponly' => true, 'samesite' => 'Lax'));
 session_start();
 require_once '../inc/Database.php';
 require_once '../inc/Lang.php'; // abifunktsioon e() ja Lang::field()
