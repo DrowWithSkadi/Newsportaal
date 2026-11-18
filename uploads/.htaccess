@@ -1,4 +1,8 @@
-# Üleslaetud pildid: PHP-failide käivitamine keelatud
-<FilesMatch "\.(php|phtml|phar)$">
+# Üleslaaditud failid: ainult pildid, mitte käivitatav kood
+<FilesMatch "\.(php|phtml|php[0-9]|phar|cgi|pl|py|sh)$">
     Require all denied
 </FilesMatch>
+<IfModule mod_php.c>
+php_flag engine off
+</IfModule>
+Options -Indexes

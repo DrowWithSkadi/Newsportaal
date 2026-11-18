@@ -1,6 +1,29 @@
+# Turvalisus: keela juurdepääs failidele, mis ei kuulu avalikku veebi
+# (lähtekood, andmebaasi dump, logid, seadistused, versioonihaldus)
+
+# .git, .env, .htaccess jms peidetud failid ja kaustad
+RedirectMatch 404 /\.(git|env|ht|idea|vscode|DS_Store)
+
+# Andmebaasi dumbid, logid, dokumentatsioon, seadistus- ja skriptifailid
+<FilesMatch "\.(sql|log|md|ya?ml|bat|sh|ini|lock|json|dist|bak|old|sample)$">
+    Require all denied
+</FilesMatch>
+
+<FilesMatch "^(Dockerfile|docker-compose|composer|package)">
+    Require all denied
+</FilesMatch>
+
+# Keela PHP-failide käivitamine üleslaaditud piltide kaustas
 <IfModule mod_rewrite.c>
 RewriteEngine on
+
+# Rakenduse sisemised kaustad ei ole brauserist kättesaadavad
+RewriteRule ^(model|inc|lang|route|view|salon_admin/model|salon_admin/viewAdmin|salon_admin/controllerAdmin|controller)/ - [F,L]
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule (.+) index.php
 </IfModule>
+
+# Ära näita kausta sisu, kui index-fail puudub
+Options -Indexes
