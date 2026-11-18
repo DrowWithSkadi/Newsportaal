@@ -12,8 +12,8 @@ class Database {
 
     function __construct() {
         $this->host     = getenv('DB_HOST') ?: 'db';
-        $this->user     = getenv('DB_USER') ?: 'root';
-        $this->password = getenv('DB_PASSWORD') !== false ? getenv('DB_PASSWORD') : 'root';
+        $this->user     = getenv('DB_USER') ?: 'lilia_app';
+        $this->password = getenv('DB_PASSWORD') !== false ? getenv('DB_PASSWORD') : '';
         $this->baseName = getenv('DB_NAME') ?: 'ilusalong';
         $this->connect();
     }
@@ -32,7 +32,10 @@ class Database {
                     array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION)
                 );
             } catch (Exception $e) {
-                die('Connection failed : ' . $e->getMessage());
+                // Veateade ei tohi sisaldada hosti, kasutajanime ega parooli
+                error_log('DB connection failed: ' . $e->getMessage());
+                http_response_code(503);
+                die('Andmebaasiga ühendumine ebaõnnestus. Palun proovi hiljem uuesti.');
             }
         }
         return $this->conn;

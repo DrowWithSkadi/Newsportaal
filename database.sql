@@ -7,7 +7,7 @@
 SET NAMES utf8mb4;
 
 DROP DATABASE IF EXISTS ilusalong;
-CREATE DATABASE ilusalong CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS ilusalong CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE ilusalong;
 
 -- ---------------------------------------------------------------------

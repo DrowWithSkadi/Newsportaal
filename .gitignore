@@ -6,3 +6,4 @@ uploads/*
 .vscode/
 update.log
 *.log
+.env

@@ -29,7 +29,7 @@ Projekt on tehtud PHP-ülesande raames eelmise ülesande (NewsPortal) malli põh
 - Kategooriate haldus
 - Broneeringute nimekiri, filtrid ja staatuse muutmine (uus / kinnitatud / tühistatud)
 
-Testkontod:
+Testkontod (ainult kohalik demoandmebaas – enne avalikku kasutuselevõttu tuleb paroolid vahetada):
 - administraator **admin@lilia.ee** / **admin123**
 - klient **mari@example.com** / **mari123** (tal on üks eelseisev ja üks möödunud broneering)
 
@@ -47,11 +47,14 @@ Testkontod:
 
 ### Docker (soovitatav)
 ```bash
+copy .env.example .env   # Windows (Linux/Mac: cp .env.example .env)
 docker compose up --build
 ```
+Paroolid loetakse failist `.env`, mis ei ole repositooriumis. Kui `.env` puudub,
+kasutatakse kohaliku arenduse vaikeväärtusi failist `docker-compose.yml`.
 - Sait: http://localhost:8080
 - Halduspaneel: http://localhost:8080/salon_admin/
-- phpMyAdmin: http://localhost:8081 (root / root)
+- phpMyAdmin: http://localhost:8081 — avatud ainult arvutist endast (127.0.0.1), kasutaja ja parool failist `.env`
 
 Andmebaas luuakse automaatselt failist `database.sql`.
 
@@ -103,6 +106,10 @@ login_attempts (ebaõnnestunud sisselogimised lukustuse jaoks)
 - CSRF-token kõigil POST-vormidel (broneering, arvustus, tühistamine, väljalogimine)
 - Klient näeb ja tühistab ainult oma broneeringuid (kontroll `user_id` järgi)
 - Üleslaetud failide tüübi ja suuruse kontroll, `uploads/` kaustas PHP käivitamine keelatud
+- Lähtekood, `database.sql`, logid ja seadistusfailid ei ole brauserist kättesaadavad (`.htaccess`)
+- Rakendus ühendub andmebaasiga piiratud õigustega kasutajana (mitte `root`), paroolid failis `.env`
+- phpMyAdmin on avatud ainult `127.0.0.1`-l, andmebaasi porti väljapoole ei avata
+- Andmebaasi veateated lähevad logisse, kasutajale ei näidata ühenduse andmeid
 
 ## Autorid
 
