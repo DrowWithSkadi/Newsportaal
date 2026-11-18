@@ -15,10 +15,11 @@ class modelAdminBooking {
         }
         $db = new Database();
         return $db->getAll(
-            "SELECT b.*, s.title_et, m.name AS master_name
+            "SELECT b.*, s.title_et, m.name AS master_name, u.email AS account_email
              FROM bookings b
              JOIN services s ON s.id = b.service_id
-             JOIN masters m ON m.id = b.master_id "
+             JOIN masters m ON m.id = b.master_id
+             LEFT JOIN users u ON u.id = b.user_id "
             . ($where ? 'WHERE ' . implode(' AND ', $where) : '') .
             " ORDER BY b.booking_date, b.booking_time",
             $params

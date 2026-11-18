@@ -23,6 +23,18 @@ CREATE TABLE users (
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------
+--  Sisselogimise katsed (kaitse parooli ära arvamise vastu):
+--  5 ebaõnnestunud katset 15 minuti jooksul -> konto lukustub 15 minutiks
+-- ---------------------------------------------------------------------
+CREATE TABLE login_attempts (
+    id           INT AUTO_INCREMENT PRIMARY KEY,
+    email        VARCHAR(150) NOT NULL,
+    ip           VARCHAR(45)  NOT NULL,
+    attempted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_attempts_email (email, attempted_at)
+) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------------------
 --  Teenuste kategooriad
 -- ---------------------------------------------------------------------
 CREATE TABLE categories (
@@ -71,6 +83,7 @@ CREATE TABLE masters (
 -- ---------------------------------------------------------------------
 CREATE TABLE bookings (
     id           INT AUTO_INCREMENT PRIMARY KEY,
+    user_id      INT NULL,
     service_id   INT NOT NULL,
     master_id    INT NOT NULL,
     client_name  VARCHAR(100) NOT NULL,
@@ -81,11 +94,15 @@ CREATE TABLE bookings (
     note         VARCHAR(500) NULL,
     status       ENUM('new','confirmed','cancelled') NOT NULL DEFAULT 'new',
     created_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    -- 1 kehtiva broneeringu puhul, NULL tühistatu puhul: tühistatud aega saab uuesti broneerida
+    slot_active  TINYINT AS (IF(status = 'cancelled', NULL, 1)) STORED,
+    CONSTRAINT fk_bookings_user FOREIGN KEY (user_id)
+        REFERENCES users(id) ON DELETE SET NULL,
     CONSTRAINT fk_bookings_service FOREIGN KEY (service_id)
         REFERENCES services(id) ON DELETE CASCADE,
     CONSTRAINT fk_bookings_master FOREIGN KEY (master_id)
         REFERENCES masters(id) ON DELETE CASCADE,
-    UNIQUE KEY uq_master_slot (master_id, booking_date, booking_time)
+    UNIQUE KEY uq_master_slot (master_id, booking_date, booking_time, slot_active)
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------
@@ -94,12 +111,17 @@ CREATE TABLE bookings (
 CREATE TABLE reviews (
     id         INT AUTO_INCREMENT PRIMARY KEY,
     service_id INT NOT NULL,
+    user_id    INT NULL,
     author     VARCHAR(100) NOT NULL,
     rating     TINYINT NOT NULL,
     text       VARCHAR(1000) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_reviews_service FOREIGN KEY (service_id)
         REFERENCES services(id) ON DELETE CASCADE,
+    CONSTRAINT fk_reviews_user FOREIGN KEY (user_id)
+        REFERENCES users(id) ON DELETE SET NULL,
+    -- üks kasutaja saab teenusele jätta ühe arvustuse
+    UNIQUE KEY uq_review_user (service_id, user_id),
     CONSTRAINT chk_rating CHECK (rating BETWEEN 1 AND 5)
 ) ENGINE=InnoDB;
 
@@ -108,8 +130,10 @@ CREATE TABLE reviews (
 -- =====================================================================
 
 -- Administraator: admin@lilia.ee / admin123
+-- Testklient:      mari@example.com / mari123
 INSERT INTO users (username, email, password, status, registration_date) VALUES
-('Administraator', 'admin@lilia.ee', '$2y$10$Ed0C/TqKM9cDWYOBHmU2D.OnZUiH4.O7bmd4JoAkoOEgxF6zwxoXa', 'admin', '2026-11-16');
+('Administraator', 'admin@lilia.ee', '$2y$10$Ed0C/TqKM9cDWYOBHmU2D.OnZUiH4.O7bmd4JoAkoOEgxF6zwxoXa', 'admin', '2026-11-16'),
+('Mari Kask', 'mari@example.com', '$2y$10$h5okAd.hDkEaL5u/Cq3TsOvyzEpcK2LYXDBgAnhIOXTmPuXk2dTwi', 'user', '2026-11-18');
 
 INSERT INTO categories (id, name_et, name_ru, icon, sort_order) VALUES
 (1, 'Juuksur',               'Парикмахерские услуги', 'scissors', 1),
@@ -193,15 +217,25 @@ INSERT INTO masters (name, category_id, bio_et, bio_ru, experience) VALUES
  'Sertifitseeritud massöör, spetsialiseerunud klassikalisele ja lõõgastavale massaažile.',
  'Сертифицированный массажист, специализируется на классическом и расслабляющем массаже.', 7);
 
-INSERT INTO bookings (service_id, master_id, client_name, phone, email, booking_date, booking_time, note, status) VALUES
-(1, 1, 'Liis Mets',      '+372 5123 4567', 'liis@example.com',  '2026-11-20', '10:00:00', NULL, 'confirmed'),
-(6, 2, 'Jelena Smirnova','+372 5234 5678', NULL,                '2026-11-20', '12:30:00', 'Pastelsed toonid', 'new'),
-(8, 3, 'Kadri Lepp',     '+372 5345 6789', 'kadri@example.com', '2026-11-21', '14:00:00', NULL, 'new');
+-- Kuupäevad arvutatakse andmebaasi loomise päeva järgi, et broneeringud oleksid alati
+-- tulevikus; pühapäev (DAYOFWEEK = 1) nihutatakse esmaspäevale.
+INSERT INTO bookings (user_id, service_id, master_id, client_name, phone, email, booking_date, booking_time, note, status) VALUES
+(NULL, 1, 1, 'Liis Mets',       '+372 5123 4567', 'liis@example.com',
+    CURDATE() + INTERVAL 2 DAY + INTERVAL (DAYOFWEEK(CURDATE() + INTERVAL 2 DAY) = 1) DAY, '10:00:00', NULL, 'confirmed'),
+(NULL, 6, 2, 'Jelena Smirnova', '+372 5234 5678', NULL,
+    CURDATE() + INTERVAL 2 DAY + INTERVAL (DAYOFWEEK(CURDATE() + INTERVAL 2 DAY) = 1) DAY, '12:30:00', 'Pastelsed toonid', 'new'),
+(NULL, 8, 3, 'Kadri Lepp',      '+372 5345 6789', 'kadri@example.com',
+    CURDATE() + INTERVAL 3 DAY + INTERVAL (DAYOFWEEK(CURDATE() + INTERVAL 3 DAY) = 1) DAY, '14:00:00', NULL, 'new'),
+(2, 6, 2, 'Mari Kask',          '+372 5456 7890', 'mari@example.com',
+    CURDATE() + INTERVAL 4 DAY + INTERVAL (DAYOFWEEK(CURDATE() + INTERVAL 4 DAY) = 1) DAY, '11:00:00', NULL, 'confirmed'),
+(2, 1, 1, 'Mari Kask',          '+372 5456 7890', 'mari@example.com',
+    CURDATE() - INTERVAL 10 DAY, '13:00:00', NULL, 'confirmed');
 
-INSERT INTO reviews (service_id, author, rating, text) VALUES
-(1, 'Liis',    5, 'Väga meeldiv meister ja täpselt selline lõikus, nagu soovisin!'),
-(1, 'Анна',    5, 'Отличная стрижка, мастер всё объяснила и подсказала уход.'),
-(6, 'Jelena',  4, 'Покрытие держится уже две недели, всё аккуратно.'),
-(8, 'Kadri',   5, 'Nahk on pärast hooldust palju puhtam ja rahulikum.'),
-(14,'Marina',  5, 'Лучший массаж в городе, очень расслабляющая атмосфера.'),
-(11,'Triin',   4, 'Kulmud said ilusa kuju, tulen kindlasti tagasi.');
+INSERT INTO reviews (service_id, user_id, author, rating, text) VALUES
+(1, 2,    'Mari Kask', 5, 'Kristiina tegi täpselt sellise lõikuse, nagu soovisin. Tulen kindlasti tagasi!'),
+(1, NULL, 'Liis',    5, 'Väga meeldiv meister ja täpselt selline lõikus, nagu soovisin!'),
+(1, NULL, 'Анна',    5, 'Отличная стрижка, мастер всё объяснила и подсказала уход.'),
+(6, NULL, 'Jelena',  4, 'Покрытие держится уже две недели, всё аккуратно.'),
+(8, NULL, 'Kadri',   5, 'Nahk on pärast hooldust palju puhtam ja rahulikum.'),
+(14, NULL, 'Marina',  5, 'Лучший массаж в городе, очень расслабляющая атмосфера.'),
+(11, NULL, 'Triin',   4, 'Kulmud said ilusa kuju, tulen kindlasti tagasi.');

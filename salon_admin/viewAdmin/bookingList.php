@@ -23,6 +23,7 @@ ob_start();
                     <td><?php echo e($b['client_name']); ?><br>
                         <small><a href="tel:<?php echo e($b['phone']); ?>"><?php echo e($b['phone']); ?></a></small>
                         <?php if ($b['email']): ?><br><small><?php echo e($b['email']); ?></small><?php endif; ?>
+                        <?php if ($b['account_email']): ?><br><span class="label label-info" title="Broneeritud kontoga"><i class="fa fa-user"></i> konto</span><?php endif; ?>
                     </td>
                     <td><?php echo e($b['title_et']); ?><br><small class="text-muted"><?php echo e($b['master_name']); ?></small></td>
                     <td><small><?php echo e($b['note']); ?></small></td>

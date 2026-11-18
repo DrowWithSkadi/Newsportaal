@@ -1,34 +1,25 @@
 <?php
 class modelAdmin {
 
-    // Administraatori autentimine: true, false või 'forbidden' (pole admin)
+    /**
+     * Administraatori autentimine (sama loogika ja lukustus nagu avalikul saidil, vt model/Auth.php).
+     * Tagastab true, 'forbidden' (kasutaja pole admin) või veateksti.
+     */
     public static function userAuthentication() {
         if (self::isAdmin()) {
             return true;
         }
         if (!isset($_POST['btnLogin'], $_POST['email'], $_POST['password'])) {
-            return false;
+            return 'Vale e-post või parool.';
         }
-        $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
-        $password = $_POST['password'];
-        if (!$email || $password === '') {
-            return false;
+        $result = Auth::attempt($_POST['email'], $_POST['password']);
+        if ($result['ok']) {
+            return self::isAdmin() ? true : 'forbidden';
         }
-
-        $db = new Database();
-        $item = $db->getOne("SELECT * FROM users WHERE email = ?", array(strtolower($email)));
-        if ($item && password_verify($password, $item['password'])) {
-            if ($item['status'] !== 'admin') {
-                return 'forbidden';
-            }
-            session_regenerate_id(true);
-            $_SESSION['sessionId'] = session_id();
-            $_SESSION['userId']    = $item['id'];
-            $_SESSION['name']      = $item['username'];
-            $_SESSION['status']    = $item['status'];
-            return true;
+        if ($result['error'] === 'login_locked') {
+            return 'Liiga palju ebaõnnestunud katseid. Konto on lukustatud ' . $result['minutes'] . ' minutiks.';
         }
-        return false;
+        return 'Vale e-post või parool.' . ($result['left'] !== null ? ' Katseid jäänud: ' . $result['left'] . '.' : '');
     }
 
     public static function isLoggedIn() {
@@ -40,8 +31,7 @@ class modelAdmin {
     }
 
     public static function userLogout() {
-        unset($_SESSION['sessionId'], $_SESSION['userId'], $_SESSION['name'], $_SESSION['status']);
-        session_destroy();
+        Auth::logout();
     }
 
     // Statistika töölaua jaoks

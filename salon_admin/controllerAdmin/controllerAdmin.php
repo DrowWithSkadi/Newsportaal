@@ -15,9 +15,7 @@ class controllerAdmin {
             header('Location: dashboard');
             exit;
         }
-        $_SESSION['errorString'] = $auth === 'forbidden'
-            ? 'Sul pole administraatori õigusi.'
-            : 'Vale e-post või parool.';
+        $_SESSION['errorString'] = $auth === 'forbidden' ? 'Sul pole administraatori õigusi.' : $auth;
         include_once 'viewAdmin/formLogin.php';
     }
 

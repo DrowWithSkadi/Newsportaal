@@ -2,6 +2,7 @@
 session_start();
 require_once '../inc/Database.php';
 require_once '../inc/Lang.php'; // abifunktsioon e() ja Lang::field()
+require_once '../model/Auth.php'; // sisselogimine ja lukustus
 
 include_once 'modelAdmin/modelAdmin.php';
 include_once 'modelAdmin/modelAdminService.php';
