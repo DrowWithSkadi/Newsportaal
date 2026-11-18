@@ -87,5 +87,12 @@ users (administraatorid ja kliendid)
 - Halduspaneel ainult rollile `admin`
 - Üleslaetud failide tüübi ja suuruse kontroll, `uploads/` kaustas PHP käivitamine keelatud
 
+## Autorid
+
+| Autor | Vastutusala |
+|---|---|
+| Tihon Patiteev ([@DrowWithSkadi](https://github.com/DrowWithSkadi)) | avalik sait, teine keel (ET/RU), kujundus ja JS-efektid, kasutusjuhend |
+| Timur Shahbazov ([@idof234](https://github.com/idof234)) | andmebaas ja Docker, halduspaneel, Figma makett ja prototüüp, nõuete spetsifikatsioon |
+
 ---
 JPTV24 · 2026
