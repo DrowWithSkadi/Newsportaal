@@ -30,6 +30,12 @@ elseif ($path == 'bookingSave' and $isPost) {
 elseif ($path == 'bookingDone') {
     $response = Controller::BookingDone();
 }
+elseif ($path == 'myBookings') {
+    $response = Controller::MyBookings();
+}
+elseif ($path == 'bookingCancel' and $isPost) {
+    $response = Controller::BookingCancel();
+}
 elseif ($path == 'slots' and isset($_GET['master'], $_GET['date'])) {
     $response = Controller::Slots($_GET['master'], $_GET['date']);
 }

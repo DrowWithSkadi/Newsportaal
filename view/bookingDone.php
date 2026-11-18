@@ -17,7 +17,10 @@ ob_start();
                 </dl>
                 <p><?php echo e(t('booking_ok_text')); ?>, <?php echo e($booking['client_name']); ?>!</p>
             <?php endif; ?>
-            <a class="btn" href="./"><?php echo e(t('back_home')); ?></a>
+            <div class="hero-actions">
+                <a class="btn" href="myBookings"><?php echo e(t('my_bookings')); ?></a>
+                <a class="btn btn-ghost" href="./"><?php echo e(t('back_home')); ?></a>
+            </div>
         </div>
     </div>
 </section>

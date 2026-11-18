@@ -57,8 +57,9 @@ class Controller {
         exit;
     }
 
-    // Broneerimise vorm
+    // Broneerimise vorm (sisselogimata kasutajale näidatakse kutset sisse logida)
     public static function BookingForm($errorKey = null, $old = array()) {
+        $user       = Auth::user();
         $categories = Category::getAllCategory();
         $services   = Service::getAllServices();
         $masters    = Master::getAllMasters();
@@ -67,9 +68,14 @@ class Controller {
         include_once 'view/booking.php';
     }
 
-    // Broneeringu salvestamine (POST)
+    // Broneeringu salvestamine (POST) — ainult sisselogitud kasutajale
     public static function BookingSave() {
-        $result = Booking::createBooking($_POST);
+        $service = isset($_POST['service_id']) ? (int)$_POST['service_id'] : 0;
+        self::requireLogin('booking' . ($service ? '?service=' . $service : ''));
+        if (!Auth::csrfValid()) {
+            return self::BookingForm('csrf_err', $_POST);
+        }
+        $result = Booking::createBooking($_POST, Auth::id());
         if ($result[0]) {
             $_SESSION['last_booking'] = $result[1];
             header('Location: bookingDone');
@@ -85,7 +91,32 @@ class Controller {
             exit;
         }
         $booking = Booking::getBookingByID($_SESSION['last_booking']);
+        if (!$booking || (int)$booking['user_id'] !== Auth::id()) {
+            self::redirect('booking');
+        }
         include_once 'view/bookingDone.php';
+    }
+
+    // Minu broneeringud: eelseisvad ja möödunud, tühistamise nupuga
+    public static function MyBookings() {
+        self::requireLogin('myBookings');
+        $upcoming = array();
+        $past = array();
+        foreach (Booking::getUserBookings(Auth::id()) as $b) {
+            if (Booking::isUpcoming($b)) {
+                array_unshift($upcoming, $b); // lähim ees
+            } else {
+                $past[] = $b;
+            }
+        }
+        include_once 'view/myBookings.php';
+    }
+
+    public static function BookingCancel() {
+        self::requireLogin('myBookings');
+        $ok = Auth::csrfValid() && Booking::cancelByUser(isset($_POST['id']) ? $_POST['id'] : 0, Auth::id());
+        self::flash($ok ? 'ok' : 'error', t($ok ? 'cancel_ok' : 'cancel_err'));
+        self::redirect('myBookings');
     }
 
     // Vabad ajad JSON-ina (AJAX)

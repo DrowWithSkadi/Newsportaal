@@ -2,6 +2,9 @@
 // Broneeringud (online-registreerimine)
 class Booking {
 
+    // Mitu tundi enne algust saab klient broneeringu ise tühistada
+    const CANCEL_HOURS = 2;
+
     /**
      * Tööaja vabad algusajad antud kuupäeval.
      * E–R 9:00–18:00, L 10:00–15:00, P suletud. Samm 30 min.
@@ -50,7 +53,7 @@ class Booking {
      * Uue broneeringu salvestamine.
      * Tagastab array(true, id) või array(false, veateate võti).
      */
-    public static function createBooking($data) {
+    public static function createBooking($data, $userId) {
         $serviceId = isset($data['service_id']) ? (int)$data['service_id'] : 0;
         $masterId  = isset($data['master_id']) ? (int)$data['master_id'] : 0;
         $name      = trim(isset($data['client_name']) ? $data['client_name'] : '');
@@ -89,9 +92,9 @@ class Booking {
         $db = new Database();
         try {
             $db->executeRun(
-                "INSERT INTO bookings (service_id, master_id, client_name, phone, email, booking_date, booking_time, note)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                array($serviceId, $masterId, mb_substr($name, 0, 100), $phone, $email !== '' ? $email : null,
+                "INSERT INTO bookings (user_id, service_id, master_id, client_name, phone, email, booking_date, booking_time, note)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                array((int)$userId, $serviceId, $masterId, mb_substr($name, 0, 100), $phone, $email !== '' ? $email : null,
                       $date, $time . ':00', $note !== '' ? mb_substr($note, 0, 500) : null)
             );
         } catch (PDOException $e) {
@@ -111,5 +114,43 @@ class Booking {
              WHERE b.id = ?",
             array((int)$id)
         );
+    }
+
+    // Kasutaja kõik broneeringud (uuemad eespool)
+    public static function getUserBookings($userId) {
+        $db = new Database();
+        return $db->getAll(
+            "SELECT b.*, s.title_et, s.title_ru, s.price, s.duration_min, m.name AS master_name
+             FROM bookings b
+             JOIN services s ON s.id = b.service_id
+             JOIN masters m ON m.id = b.master_id
+             WHERE b.user_id = ?
+             ORDER BY b.booking_date DESC, b.booking_time DESC",
+            array((int)$userId)
+        );
+    }
+
+    // Kas broneering on veel ees (ja mitte tühistatud)
+    public static function isUpcoming($b) {
+        return $b['status'] !== 'cancelled' && strtotime($b['booking_date'] . ' ' . $b['booking_time']) > time();
+    }
+
+    // Klient saab tühistada kuni CANCEL_HOURS tundi enne algust
+    public static function canCancel($b) {
+        return $b['status'] !== 'cancelled'
+            && strtotime($b['booking_date'] . ' ' . $b['booking_time']) - time() >= self::CANCEL_HOURS * 3600;
+    }
+
+    // Tühistamine: ainult oma broneering ja ainult reeglite piires
+    public static function cancelByUser($id, $userId) {
+        $db = new Database();
+        $b = $db->getOne("SELECT * FROM bookings WHERE id = ? AND user_id = ?", array((int)$id, (int)$userId));
+        if (!$b || !self::canCancel($b)) {
+            return false;
+        }
+        return $db->executeRun(
+            "UPDATE bookings SET status = 'cancelled' WHERE id = ? AND user_id = ?",
+            array((int)$id, (int)$userId)
+        ) > 0;
     }
 }

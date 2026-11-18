@@ -16,11 +16,26 @@ ob_start();
 
 <section class="section">
     <div class="container narrow">
+        <?php if (!$user): ?>
+            <div class="login-card reveal">
+                <div class="success-icon"><?php echo Icon::svg('user'); ?></div>
+                <h2><?php echo e(t('booking_login_title')); ?></h2>
+                <p class="muted"><?php echo e(t('booking_login_text')); ?></p>
+                <?php $ret = urlencode('booking' . ($selectedService ? '?service=' . $selectedService : '')); ?>
+                <div class="hero-actions">
+                    <a class="btn" href="login?return=<?php echo $ret; ?>"><?php echo e(t('login')); ?></a>
+                    <a class="btn btn-ghost" href="registerForm?return=<?php echo $ret; ?>"><?php echo e(t('nav_register')); ?></a>
+                </div>
+            </div>
+        <?php else: ?>
+        <p class="booking-as"><?php echo Icon::svg('user'); ?> <?php echo e(t('booking_as')); ?> <strong><?php echo e($user['email']); ?></strong>
+            · <a href="myBookings"><?php echo e(t('booking_see_mine')); ?></a></p>
         <?php if ($errorKey): ?>
             <div class="alert alert-error"><strong><?php echo e(t('booking_err')); ?>.</strong> <?php echo e(t($errorKey)); ?></div>
         <?php endif; ?>
 
         <form class="form booking-form" method="POST" action="bookingSave" id="booking-form">
+            <?php echo Auth::csrfField(); ?>
             <div class="form-row">
                 <label><?php echo e(t('booking_service')); ?> *
                     <select name="service_id" id="service" required>
@@ -69,7 +84,7 @@ ob_start();
 
             <div class="form-row">
                 <label><?php echo e(t('booking_name')); ?> *
-                    <input type="text" name="client_name" maxlength="100" required value="<?php echo $val('client_name'); ?>">
+                    <input type="text" name="client_name" maxlength="100" required value="<?php echo isset($old['client_name']) ? $val('client_name') : e($user['name']); ?>">
                 </label>
                 <label><?php echo e(t('booking_phone')); ?> *
                     <input type="tel" name="phone" maxlength="30" required placeholder="+372 5xxx xxxx" value="<?php echo $val('phone'); ?>">
@@ -77,7 +92,7 @@ ob_start();
             </div>
 
             <label><?php echo e(t('booking_email')); ?>
-                <input type="email" name="email" maxlength="150" value="<?php echo $val('email'); ?>">
+                <input type="email" name="email" maxlength="150" value="<?php echo isset($old['email']) ? $val('email') : e($user['email']); ?>">
             </label>
             <label><?php echo e(t('booking_note')); ?>
                 <textarea name="note" rows="3" maxlength="500"><?php echo $val('note'); ?></textarea>
@@ -85,6 +100,7 @@ ob_start();
 
             <button class="btn btn-block" type="submit"><?php echo Icon::svg('calendar'); ?> <?php echo e(t('booking_send')); ?></button>
         </form>
+        <?php endif; ?>
     </div>
 </section>
 <?php
