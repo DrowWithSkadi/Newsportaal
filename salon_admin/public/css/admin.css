@@ -80,3 +80,41 @@ img, input, select, textarea { max-width: 100%; }
     .table-cards .status-select, .table-cards select { width: 100%; }
     .thumb-lg { width: 100%; height: auto; max-height: 200px; object-fit: cover; margin-right: 0; }
 }
+
+@media screen and (max-width: 768px) {
+    .table-wrap,
+    .table-cards {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        overflow-x: hidden;
+    }
+
+    .table-cards,
+    .table-cards tbody,
+    .table-cards tr,
+    .table-cards td {
+        display: block;
+        width: 100%;
+    }
+
+    .table-cards tr.head-row {
+        display: none;
+    }
+
+    .table-cards tr {
+        box-sizing: border-box;
+    }
+
+    .table-cards td {
+        box-sizing: border-box;
+        max-width: 100%;
+        overflow-wrap: anywhere;
+    }
+
+    .table-cards td[data-label]::before {
+        content: attr(data-label);
+        display: block;
+        text-align: left;
+    }
+}
