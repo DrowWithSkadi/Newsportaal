@@ -31,7 +31,18 @@ CREATE TABLE login_attempts (
     email        VARCHAR(150) NOT NULL,
     ip           VARCHAR(45)  NOT NULL,
     attempted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_attempts_email (email, attempted_at)
+    INDEX idx_attempts_email (email, ip, attempted_at),
+    INDEX idx_attempts_ip (ip, attempted_at)
+) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------------------
+--  Registreerimiskatsed (kaitse masinloodud kontode vastu)
+-- ---------------------------------------------------------------------
+CREATE TABLE register_attempts (
+    id           INT AUTO_INCREMENT PRIMARY KEY,
+    ip           VARCHAR(45) NOT NULL,
+    attempted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_register_ip (ip, attempted_at)
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------

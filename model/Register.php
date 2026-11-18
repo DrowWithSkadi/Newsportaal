@@ -10,6 +10,10 @@ class Register {
         if (!Auth::csrfValid()) {
             return array(0 => false, 1 => e(t('csrf_err')));
         }
+        // Kaitse masinloodud kontode vastu: ühest IP-st piiratud arv kontosid
+        if (!Auth::registrationAllowed()) {
+            return array(0 => false, 1 => e(t('reg_err_limit')));
+        }
 
         $errors   = array();
         $name     = trim(isset($_POST['name']) ? $_POST['name'] : '');
@@ -46,6 +50,7 @@ class Register {
         if (!$ok) {
             return $result;
         }
+        Auth::logRegistration();
         // uus kasutaja logitakse kohe sisse
         Auth::login($db->getOne("SELECT * FROM users WHERE id = ?", array((int)$db->lastInsertId())));
         return array(0 => true);

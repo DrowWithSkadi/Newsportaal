@@ -117,6 +117,7 @@ return array(
     'reg_err_email'      => 'Vale e-posti aadress.',
     'reg_err_pass'       => 'Parool peab olema vähemalt 6 märki.',
     'reg_err_match'      => 'Paroolid ei kattu.',
+    'reg_err_limit'  => 'Liiga palju registreerimisi lühikese aja jooksul. Palun proovi mõne minuti pärast uuesti.',
     'reg_err_exists'     => 'Selle e-postiga kasutaja on juba olemas.',
     'reg_back'           => 'Tagasi vormi juurde',
 

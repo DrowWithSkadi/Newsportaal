@@ -3,12 +3,20 @@
  * Kasutaja sisselogimine, väljalogimine ja kaitse parooli ära arvamise vastu.
  * Sama klassi kasutavad nii avalik sait kui ka halduspaneel.
  *
- * Lukustus: kui samale e-postile tehakse MAX_ATTEMPTS ebaõnnestunud katset
- * LOCK_MINUTES minuti jooksul, ei saa sellega LOCK_MINUTES minutit sisse logida.
+ * Lukustus kehtib paarile e-post + IP-aadress: kui samast IP-st tehakse samale
+ * e-postile MAX_ATTEMPTS ebaõnnestunud katset LOCK_MINUTES minuti jooksul, on see
+ * paar LOCK_MINUTES minutit lukus. Nii ei saa võõras oma katsetega teise kasutaja
+ * (nt administraatori) kontot kinni panna.
+ *
+ * Lisaks piiratakse kogu IP-aadressi: MAX_IP_ATTEMPTS ebaõnnestunud katset
+ * LOCK_MINUTES minuti jooksul lukustab IP-aadressi – see takistab paroolide
+ * proovimist paljude eri e-postidega (password spraying).
  */
 class Auth {
-    const MAX_ATTEMPTS = 5;
-    const LOCK_MINUTES = 15;
+    const MAX_ATTEMPTS    = 5;   // katset ühele e-postile ühest IP-st
+    const MAX_IP_ATTEMPTS = 20;  // katset kokku ühest IP-st
+    const LOCK_MINUTES    = 15;
+    const MAX_REGISTRATIONS_PER_IP = 5; // uut kontot ühest IP-st LOCK_MINUTES jooksul
 
     // Sisselogitud kasutaja andmed või null
     public static function user() {
@@ -43,7 +51,9 @@ class Auth {
             return array('ok' => false, 'error' => 'login_err', 'left' => null);
         }
 
-        $minutes = self::lockMinutesLeft($email);
+        $ip = self::ip();
+
+        $minutes = self::lockMinutesLeft($email, $ip);
         if ($minutes > 0) {
             return array('ok' => false, 'error' => 'login_locked', 'minutes' => $minutes);
         }
@@ -51,48 +61,94 @@ class Auth {
         $db = new Database();
         $user = $db->getOne("SELECT * FROM users WHERE email = ?", array($email));
         if ($user && password_verify($password, $user['password'])) {
-            $db->executeRun("DELETE FROM login_attempts WHERE email = ?", array($email));
+            // Õnnestunud sisselogimine nullib ainult selle IP katsed, mitte kõik
+            $db->executeRun("DELETE FROM login_attempts WHERE email = ? AND ip = ?", array($email, $ip));
             self::login($user);
             return array('ok' => true);
         }
 
         // Ebaõnnestunud katse salvestatakse ka olematu e-posti puhul,
         // et ei saaks kontrollida, millised e-postid on registreeritud.
-        $db->executeRun(
-            "INSERT INTO login_attempts (email, ip) VALUES (?, ?)",
-            array($email, isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '')
-        );
-        $left = self::MAX_ATTEMPTS - self::failedAttempts($email);
-        if ($left <= 0) {
+        $db->executeRun("INSERT INTO login_attempts (email, ip) VALUES (?, ?)", array($email, $ip));
+
+        $left = self::MAX_ATTEMPTS - self::failedAttempts($email, $ip);
+        if ($left <= 0 || self::ipAttempts($ip) >= self::MAX_IP_ATTEMPTS) {
             return array('ok' => false, 'error' => 'login_locked', 'minutes' => self::LOCK_MINUTES);
         }
         return array('ok' => false, 'error' => 'login_err', 'left' => $left);
     }
 
-    // Ebaõnnestunud katsete arv viimase LOCK_MINUTES minuti jooksul
-    private static function failedAttempts($email) {
+    // Kliendi IP-aadress
+    public static function ip() {
+        return isset($_SERVER['REMOTE_ADDR']) ? substr((string)$_SERVER['REMOTE_ADDR'], 0, 45) : '';
+    }
+
+    // Ebaõnnestunud katsed sellele e-postile sellest IP-st (viimase LOCK_MINUTES jooksul)
+    private static function failedAttempts($email, $ip) {
         $db = new Database();
         $row = $db->getOne(
             "SELECT COUNT(*) AS c FROM login_attempts
-             WHERE email = ? AND attempted_at > NOW() - INTERVAL " . self::LOCK_MINUTES . " MINUTE",
-            array($email)
+             WHERE email = ? AND ip = ? AND attempted_at > NOW() - INTERVAL " . self::LOCK_MINUTES . " MINUTE",
+            array($email, $ip)
+        );
+        return (int)$row['c'];
+    }
+
+    // Ebaõnnestunud katsed kokku sellest IP-st (kaitse paljude e-postide proovimise vastu)
+    private static function ipAttempts($ip) {
+        $db = new Database();
+        $row = $db->getOne(
+            "SELECT COUNT(*) AS c FROM login_attempts
+             WHERE ip = ? AND attempted_at > NOW() - INTERVAL " . self::LOCK_MINUTES . " MINUTE",
+            array($ip)
         );
         return (int)$row['c'];
     }
 
     // Mitu minutit on lukustuse lõpuni (0 = pole lukus)
-    public static function lockMinutesLeft($email) {
-        if (self::failedAttempts($email) < self::MAX_ATTEMPTS) {
+    public static function lockMinutesLeft($email, $ip = null) {
+        $ip = $ip === null ? self::ip() : $ip;
+        $byEmail = self::failedAttempts($email, $ip) >= self::MAX_ATTEMPTS;
+        $byIp    = self::ipAttempts($ip) >= self::MAX_IP_ATTEMPTS;
+        if (!$byEmail && !$byIp) {
             return 0;
         }
+
         $db = new Database();
         // lukustus algab viimasest katsest
-        $row = $db->getOne(
-            "SELECT TIMESTAMPDIFF(SECOND, NOW(), MAX(attempted_at) + INTERVAL " . self::LOCK_MINUTES . " MINUTE) AS s
-             FROM login_attempts WHERE email = ?",
-            array($email)
-        );
+        if ($byEmail) {
+            $row = $db->getOne(
+                "SELECT TIMESTAMPDIFF(SECOND, NOW(), MAX(attempted_at) + INTERVAL " . self::LOCK_MINUTES . " MINUTE) AS s
+                 FROM login_attempts WHERE email = ? AND ip = ?",
+                array($email, $ip)
+            );
+        } else {
+            $row = $db->getOne(
+                "SELECT TIMESTAMPDIFF(SECOND, NOW(), MAX(attempted_at) + INTERVAL " . self::LOCK_MINUTES . " MINUTE) AS s
+                 FROM login_attempts WHERE ip = ?",
+                array($ip)
+            );
+        }
         return max(1, (int)ceil(((int)$row['s']) / 60));
+    }
+
+    /**
+     * Kas sellest IP-st tohib veel uue konto luua?
+     * Takistab tuhandete kontode automaatset loomist.
+     */
+    public static function registrationAllowed() {
+        $db = new Database();
+        $row = $db->getOne(
+            "SELECT COUNT(*) AS c FROM register_attempts
+             WHERE ip = ? AND attempted_at > NOW() - INTERVAL " . self::LOCK_MINUTES . " MINUTE",
+            array(self::ip())
+        );
+        return (int)$row['c'] < self::MAX_REGISTRATIONS_PER_IP;
+    }
+
+    public static function logRegistration() {
+        $db = new Database();
+        $db->executeRun("INSERT INTO register_attempts (ip) VALUES (?)", array(self::ip()));
     }
 
     // Kasutaja andmed sessiooni (kasutatakse ka pärast registreerimist)
