@@ -16,17 +16,37 @@ class Review {
         );
     }
 
-    public static function insertReview($serviceId, $author, $rating, $text) {
-        $author = trim($author);
+    // Kas kasutaja on sellele teenusele juba arvustuse jätnud
+    public static function userHasReview($serviceId, $userId) {
+        $db = new Database();
+        return (bool)$db->getOne(
+            "SELECT id FROM reviews WHERE service_id = ? AND user_id = ?",
+            array((int)$serviceId, (int)$userId)
+        );
+    }
+
+    /**
+     * Arvustuse lisamine sisselogitud kasutaja nimel.
+     * Tagastab 'ok', 'error' (vigased andmed) või 'dup' (arvustus juba olemas).
+     */
+    public static function insertReview($serviceId, $user, $rating, $text) {
         $text   = trim($text);
         $rating = (int)$rating;
-        if ($author === '' || $text === '' || $rating < 1 || $rating > 5 || !Service::getServiceByID($serviceId)) {
-            return false;
+        if (!$user || $text === '' || $rating < 1 || $rating > 5 || !Service::getServiceByID($serviceId)) {
+            return 'error';
+        }
+        if (self::userHasReview($serviceId, $user['id'])) {
+            return 'dup';
         }
         $db = new Database();
-        return $db->executeRun(
-            "INSERT INTO reviews (service_id, author, rating, text) VALUES (?, ?, ?, ?)",
-            array((int)$serviceId, mb_substr($author, 0, 100), $rating, mb_substr($text, 0, 1000))
-        ) > 0;
+        try {
+            $db->executeRun(
+                "INSERT INTO reviews (service_id, user_id, author, rating, text) VALUES (?, ?, ?, ?, ?)",
+                array((int)$serviceId, (int)$user['id'], mb_substr($user['name'], 0, 100), $rating, mb_substr($text, 0, 1000))
+            );
+        } catch (PDOException $e) {
+            return 'dup'; // unikaalne võti (service_id, user_id)
+        }
+        return 'ok';
     }
 }

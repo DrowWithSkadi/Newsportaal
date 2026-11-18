@@ -164,7 +164,9 @@ p { margin: 0 0 1em; }
 .status-pill { display: inline-block; font-size: .75rem; font-weight: 700; padding: .2em .7em; border-radius: 999px; background: #fdf0d8; color: #8a5a12; }
 .status-confirmed .status-pill { background: #e6f1e7; color: #2f5f39; }
 .status-cancelled .status-pill { background: #eee; color: #777; }
-.my-bookings-past .my-booking { opacity: .7; box-shadow: none; }
+.my-bookings-past .my-booking { background: var(--soft); box-shadow: none; }
+.my-bookings-past .my-booking-info h3 a, .my-bookings-past .my-booking-date { color: var(--muted); }
+.my-bookings-past .my-booking-date { background: var(--card); }
 .my-booking-action { text-align: right; }
 .btn-sm { padding: .45em 1em; font-size: .85rem; }
 .my-past-title { margin-top: 2.5rem; }
@@ -395,7 +397,8 @@ p { margin: 0 0 1em; }
     .search-form input, .search-form input:focus { width: 100%; }
     .lang-switch { align-self: flex-start; }
     body.nav-open { overflow: hidden; }
-    .account { margin-left: auto; padding-left: 0; border-left: 0; }
+    .account { margin-left: auto; padding-left: 0; border-left: 0; order: 2; }
+    .burger { order: 3; }
 
     .hero-inner, .service-detail, .reviews-layout { grid-template-columns: 1fr; }
     .hero-art { max-width: 280px; order: -1; }

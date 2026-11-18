@@ -44,17 +44,14 @@ class Controller {
         include_once 'view/service.php';
     }
 
-    // Arvustuse lisamine (POST)
+    // Arvustuse lisamine (POST) — ainult sisselogitud kasutajale, üks arvustus teenuse kohta
     public static function InsertReview() {
         $id = isset($_POST['service_id']) ? (int)$_POST['service_id'] : 0;
-        $ok = Review::insertReview(
-            $id,
-            isset($_POST['author']) ? $_POST['author'] : '',
-            isset($_POST['rating']) ? $_POST['rating'] : 0,
-            isset($_POST['text']) ? $_POST['text'] : ''
-        );
-        header('Location: service?id=' . $id . ($ok ? '&review=ok' : '&review=error') . '#reviews');
-        exit;
+        self::requireLogin('service?id=' . $id . '#reviews');
+        $result = Auth::csrfValid()
+            ? Review::insertReview($id, Auth::user(), isset($_POST['rating']) ? $_POST['rating'] : 0, isset($_POST['text']) ? $_POST['text'] : '')
+            : 'error';
+        self::redirect('service?id=' . $id . '&review=' . $result . '#reviews');
     }
 
     // Broneerimise vorm (sisselogimata kasutajale näidatakse kutset sisse logida)

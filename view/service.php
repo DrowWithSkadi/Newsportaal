@@ -25,9 +25,9 @@ ob_start();
     <div class="container reviews-layout">
         <div>
             <h2><?php echo e(t('reviews_title')); ?></h2>
-            <?php if (isset($_GET['review'])): ?>
-                <div class="alert <?php echo $_GET['review'] == 'ok' ? 'alert-ok' : 'alert-error'; ?>">
-                    <?php echo e($_GET['review'] == 'ok' ? t('review_thanks') : t('review_error')); ?>
+            <?php if (isset($_GET['review'])): $rv = $_GET['review']; ?>
+                <div class="alert <?php echo $rv == 'ok' ? 'alert-ok' : 'alert-error'; ?>">
+                    <?php echo e($rv == 'ok' ? t('review_thanks') : ($rv == 'dup' ? t('review_dup') : t('review_error'))); ?>
                 </div>
             <?php endif; ?>
             <?php echo ViewReview::ReviewsByService($reviews); ?>

@@ -166,4 +166,11 @@ return array(
     'booking_login_text' => 'Broneering salvestatakse sinu kontole — nii näed oma aegu ja saad neid vajadusel tühistada.',
     'booking_as'         => 'Broneerid kontoga',
     'booking_see_mine'   => 'Vaata minu broneeringuid',
+
+    // Arvustused kontoga
+    'review_login'       => 'Arvustuse jätmiseks logi sisse.',
+    'review_login_text'  => 'Arvustusi saavad jätta ainult registreeritud kliendid — nii on arvustused ehtsad.',
+    'review_as'          => 'Arvustad kontoga',
+    'review_exists'      => 'Oled sellele teenusele juba arvustuse jätnud. Aitäh!',
+    'review_dup'         => 'Ühe teenuse kohta saab jätta ühe arvustuse.',
 );

@@ -2,11 +2,26 @@
 // Arvustuste kuvamine
 class ViewReview {
 
+    // Arvustuse vorm: külalisele kutse sisse logida, kontoga kasutajale vorm (üks arvustus teenuse kohta)
     public static function ReviewForm($serviceId) {
+        $user = Auth::user();
+        if (!$user) {
+            $ret = urlencode('service?id=' . (int)$serviceId . '#reviews');
+            return '<div class="form review-form review-locked">'
+                 . '<h3>' . e(t('review_form_title')) . '</h3>'
+                 . '<p class="muted">' . e(t('review_login_text')) . '</p>'
+                 . '<div class="hero-actions"><a class="btn" href="login?return=' . $ret . '">' . e(t('login')) . '</a>'
+                 . '<a class="btn btn-ghost" href="registerForm?return=' . $ret . '">' . e(t('nav_register')) . '</a></div></div>';
+        }
+        if (Review::userHasReview($serviceId, $user['id'])) {
+            return '<div class="form review-form review-locked"><h3>' . e(t('review_form_title')) . '</h3>'
+                 . '<p class="muted">' . Icon::svg('check') . ' ' . e(t('review_exists')) . '</p></div>';
+        }
         $html  = '<form class="form review-form" method="POST" action="insertreview">';
         $html .= '<h3>' . e(t('review_form_title')) . '</h3>';
+        $html .= '<p class="booking-as">' . Icon::svg('user') . ' ' . e(t('review_as')) . ' <strong>' . e($user['name']) . '</strong></p>';
+        $html .= Auth::csrfField();
         $html .= '<input type="hidden" name="service_id" value="' . (int)$serviceId . '">';
-        $html .= '<label>' . e(t('review_name')) . '<input type="text" name="author" maxlength="100" required></label>';
         $html .= '<fieldset class="rating-input"><legend>' . e(t('review_rating')) . '</legend>';
         for ($i = 5; $i >= 1; $i--) {
             $html .= '<input type="radio" id="r' . $i . '" name="rating" value="' . $i . '"' . ($i == 5 ? ' checked' : '') . '>'
