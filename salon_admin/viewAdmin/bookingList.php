@@ -13,8 +13,8 @@ ob_start();
 </ul>
 
 <div class="panel panel-default">
-    <div class="table-responsive">
-        <table class="table table-hover">
+    <div class="table-wrap">
+        <table class="table table-hover table-cards">
             <tr><th>#</th><th>Aeg</th><th>Klient</th><th>Teenus / meister</th><th>Lisainfo</th><th>Staatus</th><th></th></tr>
             <?php foreach ($arr as $b): ?>
                 <tr>

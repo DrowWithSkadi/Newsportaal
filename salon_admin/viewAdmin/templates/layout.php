@@ -41,6 +41,22 @@
     <?php echo $content; ?>
 </div>
 
+<script>
+// Mobiilis kuvatakse tabelid kaartidena: igale lahtrile lisatakse veeru pealkiri (data-label)
+document.querySelectorAll('table.table-cards').forEach(function (table) {
+    var head = table.querySelector('tr');
+    if (!head || !head.querySelector('th')) return;
+    head.classList.add('head-row');
+    var labels = Array.prototype.map.call(head.children, function (th) { return th.textContent.trim(); });
+    table.querySelectorAll('tr').forEach(function (tr) {
+        if (tr === head) return;
+        Array.prototype.forEach.call(tr.children, function (td, i) {
+            if (labels[i] && !td.hasAttribute('colspan')) td.setAttribute('data-label', labels[i]);
+        });
+    });
+});
+</script>
+
 <footer class="admin-footer container">&copy; <?php echo date('Y'); ?> Lilia ilusalong · halduspaneel</footer>
 </body>
 </html>

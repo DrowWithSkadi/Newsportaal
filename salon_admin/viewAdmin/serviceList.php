@@ -5,8 +5,8 @@
 </div>
 
 <div class="panel panel-default">
-    <div class="table-responsive">
-        <table class="table table-hover">
+    <div class="table-wrap">
+        <table class="table table-hover table-cards">
             <tr>
                 <th width="5%">ID</th>
                 <th width="10%">Pilt</th>

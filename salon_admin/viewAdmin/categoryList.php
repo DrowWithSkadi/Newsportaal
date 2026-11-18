@@ -14,8 +14,8 @@ ob_start();
 <div class="row">
     <div class="col-md-8">
         <div class="panel panel-default">
-            <div class="table-responsive">
-                <table class="table table-hover">
+            <div class="table-wrap">
+                <table class="table table-hover table-cards">
                     <tr><th>Järjekord</th><th>Nimetus (ET / RU)</th><th>Ikoon</th><th>Teenuseid</th><th>Meistreid</th><th></th></tr>
                     <?php foreach ($arr as $c): ?>
                         <tr>

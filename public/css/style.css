@@ -26,7 +26,7 @@
 
 /* ----------------------------- Alus ------------------------------- */
 *, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: clip; }
 body {
     margin: 0;
     background: var(--bg);
@@ -402,13 +402,13 @@ p { margin: 0 0 1em; }
     .burger[aria-expanded="true"] .icon-close { display: block; }
     .main-nav {
         position: fixed; top: 72px; left: 0; right: 0; height: calc(100vh - 72px); height: calc(100dvh - 72px);
-        visibility: hidden;
         flex-direction: column; align-items: stretch; gap: 1rem;
         padding: 1.5rem 1.25rem 2rem; background: var(--bg); overflow-y: auto;
-        transform: translateX(100%); transition: transform .4s cubic-bezier(.2, .7, .2, 1);
+        /* suletud menüü ei ole ekraani kõrval (ei tekita horisontaalset kerimist) */
+        opacity: 0; visibility: hidden; transform: translateY(-12px);
+        transition: opacity .3s ease, transform .35s cubic-bezier(.2, .7, .2, 1), visibility .35s;
     }
-    .main-nav.open { transform: none; visibility: visible; }
-    .main-nav { transition: transform .4s cubic-bezier(.2, .7, .2, 1), visibility .4s; }
+    .main-nav.open { opacity: 1; visibility: visible; transform: none; }
     .topmenu { flex-direction: column; }
     .topmenu a { font-size: 1.15rem; padding: .8rem .4rem; border-bottom: 1px solid var(--line); border-radius: 0; }
     .topmenu > li > a::after { display: none; }

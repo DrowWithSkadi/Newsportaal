@@ -10,8 +10,8 @@
 
 <div class="panel panel-default">
     <div class="panel-heading"><i class="fa fa-calendar"></i> Eelseisvad broneeringud</div>
-    <div class="table-responsive">
-        <table class="table table-hover">
+    <div class="table-wrap">
+        <table class="table table-hover table-cards">
             <tr><th>Kuupäev</th><th>Aeg</th><th>Klient</th><th>Teenus</th><th>Meister</th><th>Staatus</th></tr>
             <?php foreach ($upcoming as $b): ?>
                 <tr>
